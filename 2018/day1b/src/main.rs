@@ -9,7 +9,7 @@ fn main()
 
     if args.len() < 2
     {
-        println!("You have to provide a Input-File");
+        println!("You have to provide an Input-File");
         process::exit(1);       
     } 
 
