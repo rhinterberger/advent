@@ -6,7 +6,7 @@ use std::str;
 
 fn main()
 {
-    let args: Vec<String> = env::args().collect();
+    let args:Vec<String> = env::args().collect();
 
     if args.len() < 2
     {
@@ -23,8 +23,8 @@ fn main()
 fn countletters(s: &str) -> (i32, i32)
 {
     let mut charcounts = HashMap::new();
-    let mut threes :i32 = 0;
-    let mut twos :i32 = 0;
+    let mut threes:i32 = 0;
+    let mut twos:i32 = 0;
     
     for c in s.chars()
     {
@@ -34,16 +34,8 @@ fn countletters(s: &str) -> (i32, i32)
 
     for num in charcounts.values()
     {
-        if *num == 3
-        {
-            threes=1; 
-            continue;
-        }
-        if *num == 2
-        {
-            twos=1; 
-            continue;
-        }
+        if *num == 3 { threes=1; continue; }
+        if *num == 2 { twos=1; continue; }
     }
  
     (twos,threes)
@@ -51,8 +43,8 @@ fn countletters(s: &str) -> (i32, i32)
 
 fn aggregate(bigstring: String) -> i32
 {
-    let mut threes :i32 = 0;
-    let mut twos :i32 = 0;
+    let mut threes:i32 = 0;
+    let mut twos:i32 = 0;
     
     for line in bigstring.lines()
     {
