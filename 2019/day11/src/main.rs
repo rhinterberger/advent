@@ -65,16 +65,15 @@ struct Point {
     x: i32,
     y: i32,
 }
+
 impl Add for Point {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
+        Self { x: self.x + other.x, y: self.y + other.y }
     }
 }
+
 impl Point {
     fn left( &mut self) {
         match self {
