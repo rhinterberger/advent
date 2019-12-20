@@ -1,8 +1,6 @@
 use std::{fs, thread};
 use std::sync::mpsc::{channel, Sender, Receiver};
-use std::collections::{HashMap, HashSet};
-use std::ops::Add;
-
+use std::collections::{ HashSet};
 
 fn main()
 {
