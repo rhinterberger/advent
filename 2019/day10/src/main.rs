@@ -86,7 +86,7 @@ fn get_visible_asteroids(a1: &Asteroid, asteroids: &Vec<Asteroid>) -> HashMap<i3
 
         if visible_asteroids.contains_key(&current_asteroid.angle) && visible_asteroids[&current_asteroid.angle].distance > current_asteroid.distance {
             visible_asteroids.insert(current_asteroid.angle, current_asteroid);
-        } else {
+        } else if !visible_asteroids.contains_key(&current_asteroid.angle) {
             visible_asteroids.insert(current_asteroid.angle, current_asteroid);
         }
     }
