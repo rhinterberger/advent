@@ -1,49 +1,73 @@
 use std::fs;
 
-fn main()
-{
-    let filecontents = fs::read_to_string("input.txt").unwrap();
+fn main() {
+    let filecontents = fs::read_to_string("input.txt")
+        .expect("Can not open file");
 
-    println!("Part 1 : Total Fuel needed {}", calc_fuel(filecontents.to_string()));
-    println!("Part 2 : Total Fuel needed {}", calc_total_fuel(filecontents.to_string()));
+    let modules = filecontents.lines()
+        .map(parse_mass)
+        .collect::<Vec<i32>>();
+
+    let fuel = modules.iter()
+        .fold(0, |sum, mass| sum + fuel_simple(*mass));
+
+    println!("Part 1 : Total Fuel needed {}", fuel);
+
+    let fuel = modules.iter()
+        .fold(0, |sum, mass| sum + fuel_total(*mass));
+
+    println!("Part 2 : Total Fuel needed {}", fuel);
 }
 
-fn calc_fuel(filecontents: String) -> f32
-{
-    let mut sum:f32 = 0.0;
-
-    let modules = filecontents.lines().into_iter().map(|valstr| valstr.parse::<f32>());
-    for mass in modules
-    {
-        sum += fuel(mass.unwrap());
+fn parse_mass(int_string: &str) -> i32 {
+    match int_string.parse::<i32>() {
+        Ok(mass) => mass,
+        Err(e) => {
+            println!("Parse Error {} : {}", e, int_string);
+            0
+        }
     }
-    sum
 }
 
-fn fuel(mass:f32) -> f32
-{
-    (mass/3.0).floor()-2.0
-}
+fn fuel_total(module:i32) -> i32 {
+    let mut sum :i32 = 0;
 
-fn calc_total_fuel(filecontents: String) -> f32
-{
-    let mut sum:f32 = 0.0;
-    let modules = filecontents.lines().into_iter().map(|valstr| valstr.parse::<f32>());
-
-    for module in modules {
-        sum += real_fuel(module.unwrap());
-    }
-    sum
-}
-
-fn real_fuel(mass:f32) -> f32
-{
-    let mut sum :f32 = 0.0;
-    let mut fuel_needed = fuel(mass);
-    while fuel_needed > 0.0
-    {
+    let mut fuel_needed = fuel_simple(module);
+    while fuel_needed > 0 {
         sum += fuel_needed;
-        fuel_needed = fuel(fuel_needed);
+        fuel_needed = fuel_simple(fuel_needed);
     }
     sum
+}
+
+fn fuel_simple(mass: i32) -> i32 {
+    mass/3 - 2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_mass() {
+        assert_eq!(parse_mass("1"), 1);
+        assert_eq!(parse_mass("9999"), 9999);
+        assert_eq!(parse_mass("10000000000"), 0);
+        assert_eq!(parse_mass("not a number"), 0);
+    }
+
+    #[test]
+    fn test_fuel_formula() {
+        assert_eq!(fuel_simple(12), 2);
+        assert_eq!(fuel_simple(14), 2);
+        assert_eq!(fuel_simple(1969), 654);
+        assert_eq!(fuel_simple(100756), 33583);
+    }
+
+    #[test]
+    fn test_total_fuel_per_module() {
+        assert_eq!(fuel_total(14), 2);
+        assert_eq!(fuel_total(1969), 966);
+        assert_eq!(fuel_total(100756), 50346);
+    }
 }
