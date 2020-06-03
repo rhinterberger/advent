@@ -1,10 +1,8 @@
 use std::fs;
 
 fn main() {
-    let filecontents = fs::read_to_string("input.txt")
-        .expect("Cannot open [input.txt]");
-
-    let modules = filecontents
+    let modules = fs::read_to_string("input.txt")
+        .expect("Cannot open [input.txt]")
         .lines()
         .map(parse_mass)
         .collect::<Vec<i32>>();
