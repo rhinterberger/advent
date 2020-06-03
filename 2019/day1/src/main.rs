@@ -2,28 +2,31 @@ use std::fs;
 
 fn main() {
     let filecontents = fs::read_to_string("input.txt")
-        .expect("Can not open file");
+        .expect("Cannot open [input.txt]");
 
-    let modules = filecontents.lines()
+    let modules = filecontents
+        .lines()
         .map(parse_mass)
         .collect::<Vec<i32>>();
 
-    let fuel = modules.iter()
+    let fuel = modules
+        .iter()
         .fold(0, |sum, mass| sum + fuel_simple(*mass));
 
     println!("Part 1 : Total Fuel needed {}", fuel);
 
-    let fuel = modules.iter()
+    let fuel = modules
+        .iter()
         .fold(0, |sum, mass| sum + fuel_total(*mass));
 
     println!("Part 2 : Total Fuel needed {}", fuel);
 }
 
-fn parse_mass(int_string: &str) -> i32 {
-    match int_string.parse::<i32>() {
+fn parse_mass(int_text: &str) -> i32 {
+    match int_text.parse::<i32>() {
         Ok(mass) => mass,
-        Err(e) => {
-            println!("Parse Error {} : {}", e, int_string);
+        Err(error) => {
+            println!("Parse Error {} : [{}]", error, int_text);
             0
         }
     }
@@ -52,8 +55,9 @@ mod tests {
     fn test_parse_mass() {
         assert_eq!(parse_mass("1"), 1);
         assert_eq!(parse_mass("9999"), 9999);
+        assert_eq!(parse_mass("100.0"), 0);
         assert_eq!(parse_mass("10000000000"), 0);
-        assert_eq!(parse_mass("not a number"), 0);
+        assert_eq!(parse_mass("I'm not parsable"), 0);
     }
 
     #[test]
