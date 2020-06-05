@@ -1,61 +1,78 @@
 use std::fs;
 use std::cmp::{min, max};
 
-fn main()
-{
-    let filecontents = fs::read_to_string("input.txt").unwrap();
+fn main() {
+    let wires = fs::read_to_string("input.txt")
+        .expect("Cannot open file [input.txt]")
+        .lines()
+        .map(|line| generate_wire_paths(&line.to_string()))
+        .collect::<Vec<Vec<PathSegment>>>();
 
-    let mut paths = filecontents.lines();
+    let intersections = find_intersections(&wires);
 
-    let path1 = paths.next().unwrap();
-    let path2 = paths.next().unwrap();
+    let min_distance = intersections
+        .iter()
+        .min_by_key(|intersection| intersection.point.manhattan())
+        .unwrap()
+        .point.manhattan();
+    println!("Part 1: Minimum Manhattan Distance: {}", min_distance);
 
-    let mut p1_lines = generate_lines(path1);
-    let mut p2_lines = generate_lines(path2);
-
-    let intersections = intersect_lines(&mut p1_lines,&mut p2_lines);
-    let min_distance = intersections.clone().into_iter().min_by_key(|intersection| intersection.point.manhattan()).unwrap().point.manhattan();
-    println!("Minimum Manthattan Distance: {}", min_distance);
-
-    let min_delay = intersections.clone().into_iter().min_by_key(|intersection| intersection.get_delay()).unwrap().get_delay();
-    println!("Minimum Delay : {}", min_delay);
+    let min_delay = intersections
+        .iter()
+        .min_by_key(|intersection| intersection.get_delay())
+        .unwrap()
+        .get_delay();
+    println!("Part 2: Minimum Delay : {}", min_delay);
 }
 
-fn generate_lines(path_str : &str) -> Vec<Line>
-{
-    let path = path_str.split(",");
-    let mut lines :Vec<Line> = Vec::new();
+fn generate_wire_paths(path_str: &String) -> Vec<PathSegment> {
+    let mut prev_segment = PathSegment::new();
 
-    let mut current_line = Line {start: Point {x: 0, y:0}, end: Point {x:0,y:0}, steps: 0};
+    path_str
+        .split(",")
+        .map(|segment_text| {
+            prev_segment = generate_path_segment(segment_text, prev_segment);
+            prev_segment
+        })
+        .collect::<Vec<PathSegment>>()
+}
 
-    for delta in path {
-        current_line.start=current_line.end;
+fn generate_path_segment(segment_text: &str, previous_segment: PathSegment) -> PathSegment {
 
-        let (direction, distance) = delta.split_at(1);
-        let d = distance.parse::<i32>().unwrap();
+    let (direction, distance) = convert_segment_text(segment_text);
 
-        match direction {
-            "R" => current_line.end.x += d,
-            "L" => current_line.end.x -= d,
-            "U" => current_line.end.y += d,
-            "D" => current_line.end.y -= d,
-            _ => panic!(),
-        }
+    let mut new_segment = PathSegment {
+        start: previous_segment.end,
+        end: previous_segment.end,
+        length: previous_segment.length + distance
+    };
 
-        current_line.steps += d;
-        lines.push(current_line);
+    match direction {
+        "R" => new_segment.end.x += distance,
+        "L" => new_segment.end.x -= distance,
+        "U" => new_segment.end.y += distance,
+        "D" => new_segment.end.y -= distance,
+        _ => panic!(),
     }
 
-    return lines;
+    new_segment
 }
 
-fn intersect_lines(l1: &mut Vec<Line>, l2: &mut Vec<Line>) -> Vec<Intersection>
-{
-    let mut intersections :Vec<Intersection> = Vec::new();
-    for line1 in l1.to_vec() {
-        for line2 in l2.to_vec() {
-            match line1.intersect(&line2) {
-                Some(point) => {intersections.push(Intersection{ line1, line2, point})},
+fn convert_segment_text(segment_text: &str) -> (&str, i32) {
+    let (direction, distance) = segment_text.split_at(1);
+
+    ( direction, distance.parse::<i32>().unwrap() )
+}
+
+fn find_intersections(wires: &Vec<Vec<PathSegment>>) -> Vec<Intersection> {
+    let mut intersections: Vec<Intersection> = Vec::new();
+
+    for line1 in &wires[0] {
+        for line2 in &wires[1] {
+            match line1.intersect(line2) {
+                Some(point) => {
+                    intersections.push( Intersection { line1: line1.clone(), line2: line2.clone(), point } )
+                },
                 None => {},
             }
         }
@@ -69,65 +86,150 @@ struct Point {
     y:i32
 }
 
-impl Point
-{
-    fn manhattan(&self) -> i32
-    {
+impl Point {
+    fn new() -> Point {
+        Point {x:0, y:0}
+    }
+
+    fn manhattan(&self) -> i32 {
         self.x.abs() + self.y.abs()
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Line {
+struct PathSegment {
     start: Point,
     end: Point,
-    steps: i32
+    length: i32
 }
 
-impl Line
+impl PathSegment
 {
+    fn new() -> PathSegment {
+        PathSegment { start : Point::new(), end : Point::new(), length: 0}
+    }
 
-    fn intersect(&self, line: &Line) -> Option<Point>
-    {
-        let mut p :Point = Point {x:0, y:0};
-        // Horizontal
-        if  min(self.start.x, self.end.x) <= line.start.x &&
-            max(self.start.x, self.end.x) >= line.start.x &&
-            min(line.start.y, line.end.y) <= self.start.y &&
-            max(line.start.y, line.end.y) >= self.start.y
-        {
-            p = Point {x: line.start.x, y: self.start.y};
-        }
-        // Vertical
-        if  min(self.start.y, self.end.y) <= line.start.y &&
-            max(self.start.y, self.end.y) >= line.start.y &&
-            min(line.start.x, line.end.x) <= self.start.x &&
-            max(line.start.x, line.end.x) >= self.start.x
-        {
-            p = Point {x: self.start.x, y: line.start.y};
+    fn intersect(&self, test_segment: &PathSegment) -> Option<Point> {
+        let mut intersection_point = None;
+
+        if !self.is_parallel(test_segment) {
+            if self.is_horizontal() {
+                intersection_point = self.get_intersection_point(test_segment);
+            } else {
+                intersection_point = test_segment.get_intersection_point(self);
+            }
         }
 
-        if p.x != 0 || p.y != 0{
-            return Some(Point {x: line.start.x, y: self.start.y});
+        intersection_point
+    }
+
+    fn get_intersection_point(&self, test_segment: &PathSegment) -> Option<Point> {
+
+        if  min(self.start.x, self.end.x) <= test_segment.start.x &&
+            max(self.start.x, self.end.x) >= test_segment.start.x &&
+            min(test_segment.start.y, test_segment.end.y) <= self.start.y &&
+            max(test_segment.start.y, test_segment.end.y) >= self.start.y
+        {
+            return Some( Point { x:test_segment.start.x, y:self.start.y});
         }
+
         None
+    }
+
+    fn is_parallel(&self, test_segment: &PathSegment) -> bool {
+        (self.start.x == self.end.x && test_segment.start.x == test_segment.end.x) ||
+        (self.start.y == self.end.y && test_segment.start.y == test_segment.end.y)
+    }
+
+    fn is_horizontal(&self) -> bool {
+        self.start.y == self.end.y
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 struct Intersection {
-    line1: Line,
-    line2: Line,
+    line1: PathSegment,
+    line2: PathSegment,
     point: Point
 }
 
 impl Intersection
 {
-    fn get_delay(&self) -> i32
-    {
-        let delta_l1 = self.line1.end.x.abs() - self.point.x.abs() + self.line1.end.y.abs() - self.point.y.abs();
-        let delta_l2 = self.line2.end.x.abs() - self.point.x.abs() + self.line2.end.y.abs() - self.point.y.abs();
+    fn get_delay(&self) -> i32 {
+        let delta_l1 = (self.line1.end.manhattan() - self.point.manhattan()).abs();
+        let delta_l2 = (self.line2.end.manhattan() - self.point.manhattan()).abs();
 
-        self.line1.steps + self.line2.steps - delta_l1.abs() - delta_l2.abs()
+        self.line1.length + self.line2.length - delta_l1 - delta_l2
+    }
+}
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    #[test]
+    fn test_manhattan() {
+        let point = Point {x:0, y:0};
+        assert_eq!(point.manhattan(),0);
+        let point = Point {x:1, y:0};
+        assert_eq!(point.manhattan(),1);
+        let point = Point {x:0, y:1};
+        assert_eq!(point.manhattan(),1);
+        let point = Point {x:50, y:50};
+        assert_eq!(point.manhattan(),100);
+        let point = Point {x:-50, y:50};
+        assert_eq!(point.manhattan(),100);
+        let point = Point {x:50, y:-50};
+        assert_eq!(point.manhattan(),100);
+        let point = Point {x:-50, y:-50};
+        assert_eq!(point.manhattan(),100);
+    }
+
+    #[test]
+    fn test_horizontal() {
+        let segment = PathSegment { start: Point { x: 0, y: 0 }, end: Point { x: 10, y: 0 }, length: 0 };
+        assert_eq!(segment.is_horizontal(), true);
+
+        let segment = PathSegment { start: Point {x:0, y:0}, end: Point {x:0, y:10}, length: 0 };
+        assert_eq!(segment.is_horizontal(), false);
+    }
+
+    #[test]
+    fn test_parallel() {
+        // Horizontal Parallel
+        let segment_a = PathSegment { start: Point {x:0, y:0}, end: Point {x:10, y:0}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:0, y:1}, end: Point {x:10, y:1}, length: 0 };
+        assert_eq!(segment_a.is_parallel(&segment_b), true);
+        assert_eq!(segment_b.is_parallel(&segment_a), true);
+
+        // Vertical Parallel
+        let segment_a = PathSegment { start: Point {x:0, y:0}, end: Point {x:0, y:10}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:1, y:0}, end: Point {x:1, y:10}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:1, y:0}, end: Point {x:1, y:10}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:1, y:0}, end: Point {x:1, y:10}, length: 0 };
+        assert_eq!(segment_a.is_parallel(&segment_b), true);
+        assert_eq!(segment_b.is_parallel(&segment_a), true);
+
+        // intersecting
+        let segment_a = PathSegment { start: Point {x:0, y:0}, end: Point {x:10, y:0}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:5, y:-5}, end: Point {x:5, y:5}, length: 0 };
+        assert_eq!(segment_a.is_parallel(&segment_b), false);
+        assert_eq!(segment_b.is_parallel(&segment_a), false);
+    }
+
+    #[test]
+    fn test_intersect() {
+        // Horizontal Parallel
+        let segment_a = PathSegment { start: Point {x:0, y:0}, end: Point {x:10, y:0}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:0, y:1}, end: Point {x:10, y:1}, length: 0 };
+        assert_eq!(segment_a.intersect(&segment_b).is_some(), false);
+        assert_eq!(segment_b.intersect(&segment_a).is_some(), false);
+
+        // intersecting
+        let segment_a = PathSegment { start: Point {x:0, y:0}, end: Point {x:10, y:0}, length: 0 };
+        let segment_b = PathSegment { start: Point {x:5, y:-5}, end: Point {x:5, y:5}, length: 0 };
+        assert_eq!(segment_a.intersect(&segment_b).is_some(), true);
+        assert_eq!(segment_b.intersect(&segment_a).is_some(), true);
     }
 }
