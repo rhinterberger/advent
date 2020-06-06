@@ -17,6 +17,37 @@ fn main() {
     println!("{} Keys with pairs found", count_pairs);
 }
 
+fn split_to_digits(mut num: i32) -> [i32; 6]
+{
+    let mut digits :[i32; 6] = [0; 6];
+    let mut digit_index = 6;
+
+    while num > 0 {
+        digit_index -= 1;
+        digits[digit_index] = num % 10;
+        num /= 10;
+    }
+    digits
+}
+
+fn ascending(digits : &[i32; 6]) -> bool {
+    for i in 0..5 {
+        if digits[i] > digits[i+1] {
+            return false;
+        }
+    }
+    true
+}
+
+fn check_repeat(digits: &[i32;6]) -> bool {
+    for i in 0..5 {
+        if digits[i] == digits[i+1] {
+            return true;
+        }
+    }
+    false
+}
+
 fn check_pairs(digits: &[i32;6]) -> bool {
     let mut group_len = 1;
     for i in 0..5 {
@@ -31,37 +62,6 @@ fn check_pairs(digits: &[i32;6]) -> bool {
         }
     }
     group_len == 2
-}
-
-fn check_repeat(digits: &[i32;6]) -> bool {
-    for i in 0..5 {
-        if digits[i] == digits[i+1] {
-            return true;
-        }
-    }
-    false
-}
-
-fn ascending(digits : &[i32; 6]) -> bool {
-    for i in 0..5 {
-        if digits[i] > digits[i+1] {
-            return false;
-        }
-    }
-    true
-}
-
-fn split_to_digits(mut num: i32) -> [i32; 6]
-{
-    let mut digits :[i32; 6] = [0; 6];
-    let mut digit_index = 6;
-
-    while num > 0 {
-        digit_index -= 1;
-        digits[digit_index] = num % 10;
-        num /= 10;
-    }
-    digits
 }
 
 #[cfg(test)]
