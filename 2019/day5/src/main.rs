@@ -11,9 +11,9 @@ fn main()
         .map(|value| value.parse::<i32>().unwrap())
         .collect::<Vec<i32>>();
 
-    let mut computer = Intcode::new(program.clone());
-    computer.run(1);
+    Intcode::new(program.clone(), 1)
+        .run();
 
-    let mut computer = Intcode::new(program.clone());
-    computer.run(5);
+    Intcode::new(program.clone(),5)
+        .run();
 }
