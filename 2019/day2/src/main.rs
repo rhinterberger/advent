@@ -1,25 +1,42 @@
 use std::fs;
 
 fn main() {
-    let program = fs::read_to_string("input.txt")
-        .expect("Cannot open [input.txt]")
-        .split(",")
-        .map(|value| value.parse::<u32>().unwrap())
-        .collect::<Vec<u32>>();
+    let program = read_input("input.txt");
 
     let verb:u32 = 12;
     let noun:u32 = 2;
     let result = intcode(verb,noun,&mut program.clone());
     println!("Part 1: {}", result);
 
+    let desired_output = 19690720;
+    let (verb, noun) = find_verb_noun(desired_output, program.clone())
+        .expect("No Verb/Noun Combination found");
+    println!("Part 2: Verb: {} Noun: {} - {}", verb, noun, 100*verb+noun);
+}
+
+fn read_input(path: &str) -> Vec<u32> {
+    fs::read_to_string(path)
+        .expect(&format!("Cannot open [{}]", path.to_string()))
+        .split(",")
+        .map(parse_program)
+        .collect::<Vec<u32>>()
+}
+
+fn parse_program(int_text: &str) -> u32 {
+    int_text
+        .parse::<u32>()
+        .expect(&format!("Parse Error {}", int_text))
+}
+
+fn find_verb_noun(desired_output: u32, program: Vec<u32>) -> Option<(u32, u32)> {
     for verb in 0..99 {
         for noun in 0..99 {
-            if intcode(verb, noun,&mut program.clone()) == 19690720 {
-                println!("Part 2: Verb: {} Noun: {} - {}", verb, noun, 100*verb+noun);
-                break;
+            if intcode(verb, noun, &mut program.clone()) == desired_output {
+                return Some((verb, noun));
             }
         }
     }
+    None
 }
 
 fn intcode(verb: u32, noun: u32, program: &mut Vec<u32>) -> u32 {
