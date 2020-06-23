@@ -1,23 +1,25 @@
 use std::fs;
 
 fn main() {
-    let modules = fs::read_to_string("input.txt")
-        .expect("Cannot open [input.txt]")
-        .lines()
-        .map(parse_mass)
-        .collect::<Vec<i32>>();
+    let modules = read_input("input.txt");
 
     let fuel = modules
         .iter()
         .fold(0, |sum, mass| sum + fuel_simple(*mass));
-
     println!("Part 1 : Total Fuel needed {}", fuel);
 
     let fuel = modules
         .iter()
         .fold(0, |sum, mass| sum + fuel_total(*mass));
-
     println!("Part 2 : Total Fuel needed {}", fuel);
+}
+
+fn read_input(path: &str) -> Vec<i32> {
+    fs::read_to_string(path)
+        .expect(&format!("Cannot open [{}]", path.to_string()))
+        .lines()
+        .map(parse_mass)
+        .collect::<Vec<i32>>()
 }
 
 fn parse_mass(int_text: &str) -> i32 {
@@ -31,7 +33,7 @@ fn parse_mass(int_text: &str) -> i32 {
 }
 
 fn fuel_total(module:i32) -> i32 {
-    let mut sum :i32 = 0;
+    let mut sum: i32 = 0;
 
     let mut fuel_needed = fuel_simple(module);
     while fuel_needed > 0 {
@@ -48,6 +50,12 @@ fn fuel_simple(mass: i32) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_read_input() {
+        read_input("non_existing_file.txt");
+    }
 
     #[test]
     fn test_parse_mass() {
