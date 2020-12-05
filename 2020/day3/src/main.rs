@@ -2,6 +2,7 @@ use std::fs;
 
 fn main() {
     let landscape = read_input("input.txt");
+
     let trees = count_trees(&landscape,3,1);
     println!("Trees: {}", trees);
 
