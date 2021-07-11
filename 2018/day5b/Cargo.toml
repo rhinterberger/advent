@@ -1,0 +1,7 @@
+[package]
+name = "day5b"
+version = "0.1.0"
+authors = ["Rainer Hinterberger <r.hinterberger@vim.at>"]
+edition = "2018"
+
+[dependencies]

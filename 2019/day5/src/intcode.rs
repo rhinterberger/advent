@@ -77,8 +77,7 @@ impl Intcode {
     fn jump_if_true(&mut self, params: Vec<usize>) {
         if self.program[params[0]] != 0 {
             self.jump(self.program[params[1]]);
-        }
-        else {
+        } else {
             self.increment_instruction_pointer(3);
         }
     }

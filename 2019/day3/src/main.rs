@@ -2,30 +2,25 @@ use std::fs;
 use std::cmp::{min, max};
 
 fn main() {
-    let wires = fs::read_to_string("input.txt")
-        .expect("Cannot open file [input.txt]")
-        .lines()
-        .map(|line| generate_wire_paths(&line.to_string()))
-        .collect::<Vec<Vec<PathSegment>>>();
-
+    let wires = read_input("input.txt");
+    
     let intersections = find_intersections(&wires);
+    let min_distance = find_min_distance(&intersections);
+    let min_delay = find_min_delay(&intersections);
 
-    let min_distance = intersections
-        .iter()
-        .min_by_key(|intersection| intersection.point.manhattan())
-        .unwrap()
-        .point.manhattan();
     println!("Part 1: Minimum Manhattan Distance: {}", min_distance);
-
-    let min_delay = intersections
-        .iter()
-        .min_by_key(|intersection| intersection.get_delay())
-        .unwrap()
-        .get_delay();
     println!("Part 2: Minimum Delay : {}", min_delay);
 }
 
-fn generate_wire_paths(path_str: &String) -> Vec<PathSegment> {
+fn read_input(path: &str) -> Vec<Vec<PathSegment>> {
+    fs::read_to_string(path)
+        .expect("Cannot open file [input.txt]")
+        .lines()
+        .map(generate_wire_paths)
+        .collect::<Vec<Vec<PathSegment>>>()
+}
+
+fn generate_wire_paths(path_str: &str) -> Vec<PathSegment> {
     let mut prev_segment = PathSegment::new();
 
     path_str
@@ -61,7 +56,10 @@ fn generate_path_segment(segment_text: &str, previous_segment: PathSegment) -> P
 fn convert_segment_text(segment_text: &str) -> (&str, i32) {
     let (direction, distance) = segment_text.split_at(1);
 
-    ( direction, distance.parse::<i32>().unwrap() )
+    ( direction,
+      distance.parse::<i32>()
+          .expect("Integer Parse error")
+    )
 }
 
 fn find_intersections(wires: &Vec<Vec<PathSegment>>) -> Vec<Intersection> {
@@ -80,6 +78,22 @@ fn find_intersections(wires: &Vec<Vec<PathSegment>>) -> Vec<Intersection> {
     intersections
 }
 
+fn find_min_distance(intersections: &Vec<Intersection>) -> i32 {
+    intersections
+        .iter()
+        .min_by_key(|intersection| intersection.point.manhattan())
+        .expect("No Intersection Found")
+        .point.manhattan()
+}
+
+fn find_min_delay(intersections: &Vec<Intersection>) -> i32 {
+    intersections
+        .iter()
+        .min_by_key(|intersection| intersection.get_delay())
+        .expect("No Intersection Found")
+        .get_delay()
+}
+
 #[derive(Debug, Clone, Copy)]
 struct Point {
     x:i32,
@@ -88,7 +102,7 @@ struct Point {
 
 impl Point {
     fn new() -> Point {
-        Point {x:0, y:0}
+        Point {x:0, y:0 }
     }
 
     fn manhattan(&self) -> i32 {
