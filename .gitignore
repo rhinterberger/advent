@@ -5,3 +5,5 @@ Cargo.lock
 .DS_Store
 *~
 **/input.txt
+**/input*.txt
+._*
