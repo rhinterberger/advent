@@ -22,7 +22,6 @@ fn main() {
     }
     let sum = board.into_iter().filter(|value| *value >= 2).count();
     println!("{}", sum);
-
 }
 
 fn read_input(path: &str) -> Vec<Line> {
@@ -71,14 +70,11 @@ impl Line {
         let start = Point {x: coords[0], y: coords[1]};
         let end = Point {x: coords[2], y: coords[3]};
 
-        let dx = (end.x - start.x).signum();
-        let dy = (end.y - start.y).signum();
+        let dx = end.x - start.x;
+        let dy = end.y - start.y;
 
-        let lx = (end.x - start.x).abs();
-        let ly = (end.y - start.y).abs();
-
-        let delta = Point {x: dx, y:dy};
-        let length = Point {x: lx, y:ly};
+        let delta = Point {x: dx.signum(), y:dy.signum()};
+        let length = Point {x: dx.abs(), y:dy.abs()};
 
         Line { start, end, delta, length }
     }
