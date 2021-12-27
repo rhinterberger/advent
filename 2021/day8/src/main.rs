@@ -1,9 +1,8 @@
 use std::fs;
-use std::ops::{Add, Index};
 use itertools::Itertools;
 
 fn main() {
-    let mut ledisplay = &read_input("input.txt");
+    let ledisplay = &read_input("input.txt");
 
     let mut count = 0;
 
@@ -60,7 +59,7 @@ fn get_output_value(perm: &Vec<char>, output: &Vec<String>) -> i32 {
     let mut value = 0;
     for digit in output {
         let number = digit.chars()
-            .fold(0,|mut acc, c|
+            .fold(0,|acc, c|
                 acc+2_i32.pow(6 - (perm.iter().position(|p| *p == c).unwrap() as u32))
             );
 
