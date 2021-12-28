@@ -93,7 +93,7 @@ impl HeightMap {
         basin_elements.push(basin.clone());
         while !search_stack.is_empty() {
             let current_point = search_stack.pop().unwrap();
-            let mut neigh = self.get_neighbors(&current_point);
+            let neigh = self.get_neighbors(&current_point);
             for neighbor in neigh {
                 if neighbor.value < 9 {
                     if !basin_elements.contains(&neighbor) {
