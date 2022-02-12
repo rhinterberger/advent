@@ -13,12 +13,14 @@ public class Main {
                 .map(Main::parseDimensions)
                 .toList();
 
-        int area = dimensions.stream()
+        int area = dimensions
+                .stream()
                 .map(Main::getArea)
                 .reduce(0, Integer::sum);
         System.out.println(area);
 
-        int ribbon = dimensions.stream()
+        int ribbon = dimensions
+                .stream()
                 .map(Main::getRibbon)
                 .reduce(0, Integer::sum);
         System.out.println(ribbon);
