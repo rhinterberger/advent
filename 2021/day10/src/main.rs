@@ -2,7 +2,7 @@ use std::fs;
 
 fn main() {
 
-    let mut nav_subsystem = read_input("input.txt");
+    let nav_subsystem = read_input("input.txt");
 
     let mut error_score = 0;
     let mut scores  =Vec::new();
@@ -18,13 +18,7 @@ fn main() {
                 ')' | '}' | ']' | '>' => {
                     if ch != expect.pop().unwrap() {
                         expect.clear();
-                        match ch {
-                            ')' => error_score += 3,
-                            '}' => error_score += 1197,
-                            ']' => error_score += 57,
-                            '>' => error_score += 25137,
-                            _ => ()
-                        }
+                        error_score += get_error_score(ch);
                         break;
                     }
                 },
@@ -32,16 +26,12 @@ fn main() {
             }
         }
 
-        let mut score = 0_i64;
-        while !expect.is_empty() {
-            match expect.pop().unwrap() {
-                ')' => score = 5 * score + 1,
-                '}' => score = 5 * score + 3,
-                ']' => score = 5 * score + 2,
-                '>' => score = 5 * score + 4,
-                _ => ()
-            }
-        }
+        let score = expect.iter()
+            .rev()
+            .fold(0, |score: i64, ch| -> i64 {
+                calculate_score(score, *ch)
+            });
+
         if score > 0 {
             scores.push(score);
         }
@@ -51,6 +41,30 @@ fn main() {
 
     scores.sort();
     println!("Part 2: {:?}", scores[scores.len()/2]);
+}
+
+fn calculate_score(score: i64, ch: char) -> i64{
+    score * 5 + get_score(ch)
+}
+
+fn get_score(ch: char) -> i64 {
+    match ch {
+        ')' => 1,
+        '}' => 3,
+        ']' => 2,
+        '>' => 4,
+        _ => 0
+    }
+}
+
+fn get_error_score(ch: char) -> i32 {
+    match ch {
+        ')' => 3,
+        '}' => 1197,
+        ']' => 57,
+        '>' => 25137,
+        _ => 0
+    }
 }
 
 fn read_input(path: &str) -> String {
