@@ -89,16 +89,7 @@ impl DumboCavern {
     }
 
     fn check_all_flashed(self: &Self) -> bool {
-        let mut flashed_dumbos = 0;
-        for y in 0..self.size_y {
-            for x in 0..self.size_x {
-                if self.cavern[y][x] == 0 {
-                    flashed_dumbos += 1;
-                }
-            }
-        }
-
-        flashed_dumbos == self.size_x * self.size_y
+        self.cavern.clone().into_iter().flatten().fold(0, |count, dumbo| count+dumbo) == 0
     }
 
     fn is_flashable(self: &Self, dumbo: i32) -> bool {
