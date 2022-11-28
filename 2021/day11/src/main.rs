@@ -1,7 +1,5 @@
 use std::fs;
 
-const FLASH_THRESHOLD: i32 = 9;
-
 fn main() {
     let input_string = fs::read_to_string("input.txt").expect("Failed to open [input.txt]");
 
@@ -25,23 +23,25 @@ fn parse_dumbo_array(input: &String) -> DumboCavern {
         )
         .collect::<Vec<Vec<i32>>>();
 
-    DumboCavern{ cavern: cavern_data.clone(), size_x: cavern_data[0].len(), size_y: cavern_data.len(), flash_threshold: FLASH_THRESHOLD, flash_count: 0 }
+    DumboCavern{ cavern: cavern_data.clone(), size_x: cavern_data[0].len(), size_y: cavern_data.len(), flash_count: 0 }
 }
 
 struct DumboCavern {
     cavern: Vec<Vec<i32>>,
     size_x: usize,
     size_y: usize,
-    flash_threshold: i32,
     flash_count: i32,
 }
+const FLASH_THRESHOLD: i32 = 9;
 
 impl DumboCavern {
+
     fn iterate(self: &mut Self, num: i32) -> Option<i32>  {
         for iteration_num in 1..num+1 {
-            self.increment();
-            self.flash_all();
-            self.reset_flashed_dumbos();
+            self.increment()
+                .flash_all()
+                .reset_flashed_dumbos();
+
             if self.check_all_flashed()  {
                 return Some(iteration_num);
             }
@@ -49,15 +49,16 @@ impl DumboCavern {
         None
     }
 
-    fn increment(self: &mut Self) {
+    fn increment(self: &mut Self) -> &mut Self {
         for y in 0..self.size_y {
             for x in 0..self.size_x {
                 self.cavern[y][x] += 1;
             }
         }
+        self
     }
 
-    fn flash_all(self: &mut Self)  {
+    fn flash_all(self: &mut Self) -> &mut Self {
         loop {
             let mut flashed = false;
 
@@ -76,6 +77,7 @@ impl DumboCavern {
                 break;
             }
         }
+        self
     }
 
     fn reset_flashed_dumbos(self: &mut Self) {
@@ -93,7 +95,7 @@ impl DumboCavern {
     }
 
     fn is_flashable(self: &Self, dumbo: i32) -> bool {
-        dumbo > self.flash_threshold
+        dumbo > FLASH_THRESHOLD
     }
 
     fn do_flash(self: &mut Self, x: i32, y: i32) {
