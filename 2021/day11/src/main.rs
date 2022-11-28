@@ -89,7 +89,7 @@ impl DumboCavern {
     }
 
     fn check_all_flashed(self: &Self) -> bool {
-        self.cavern.clone().into_iter().flatten().fold(0, |count, dumbo| count+dumbo) == 0
+        self.cavern.clone().into_iter().flatten().sum::<i32>() == 0
     }
 
     fn is_flashable(self: &Self, dumbo: i32) -> bool {
