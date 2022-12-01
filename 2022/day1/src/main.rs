@@ -6,15 +6,14 @@ fn main() {
     let mut elves = parse_input(input_string);
 
     elves.sort_unstable();
-    let sum_top_three: i32 = elves
-        .as_slice()
-        .split_at(elves.len()-3)
-        .1
-        .iter()
-        .sum();
-
     println!("Part 1: {}", elves.last().unwrap());
-    println!("Part 2:{}", sum_top_three);
+
+    let sum_top_three :i32 = elves
+        .into_iter()
+        .rev()
+        .take(3)
+        .sum();
+    println!("Part 2: {}", sum_top_three);
 }
 
 fn parse_input(input_string: String) -> Vec<i32> {
