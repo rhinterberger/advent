@@ -86,28 +86,7 @@ C Z";
         let input = parse_input(ALL_MOVES.to_string());
         assert_eq!(play_game(&input),15);
     }
-/*
-    #[test]
-    fn should_return_lose_move() {
-        let input = parse_input(ALL_MOVES);
 
-        assert_eq!(select_move(&('B','X')),('B','X'));
-    }
-
-    #[test]
-    fn should_return_draw_move() {
-
-        let input = parse_input(ALL_MOVES);
-        assert_eq!(select_move(&('A','Y')),('A','X'));
-    }
-
-    #[test]
-    fn should_return_win_move() {
-
-        let input = parse_input(ALL_MOVES);
-        assert_eq!(select_move(&('C','Z')),('C','X'));
-    }
-*/
     #[test]
     fn should_return_12() {
         let input = parse_input(ALL_MOVES.to_string());
