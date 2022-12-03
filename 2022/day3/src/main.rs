@@ -76,12 +76,6 @@ mod tests {
     }
 
     #[test]
-    fn should_split_rucksack_compartments() {
-        let rucksack = "vJrwpWtwJgWrhcsFMMfFFhFp";
-        assert_eq!(split_into_compartments(rucksack), ("vJrwpWtwJgWr".to_string(),"hcsFMMfFFhFp".to_string()));
-    }
-
-    #[test]
     fn should_find_piority_item_p() {
         let rucksacks = "vJrwpWtwJgWrhcsFMMfFFhFp";
         assert_eq!(find_priority_items(rucksacks).pop().unwrap(), 1<<15);
