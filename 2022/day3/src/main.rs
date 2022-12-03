@@ -10,37 +10,35 @@ fn main() {
 }
 
 fn find_priority_items(rucksacks: &str) -> Vec<u64> {
-    let mut prio_items:Vec<u64> = Vec::new();
-    rucksacks.lines().for_each( | rucksack| {
-        let compartments = split_into_compartments(rucksack);
-        let priority_of_current_rucksack = convert_to_alphabet_bitset(compartments.0) &
-                                                convert_to_alphabet_bitset(compartments.1);
-        prio_items.push(priority_of_current_rucksack);
-    });
-    prio_items
+    rucksacks
+        .lines()
+        .map( | rucksack| {
+            let compartments = split_into_compartments(rucksack);
+            convert_to_alphabet_bitset(compartments.0) & convert_to_alphabet_bitset(compartments.1)
+        })
+        .collect::<Vec<u64>>()
 }
 
 fn find_badges(rucksacks: &str) -> Vec<u64> {
-    let mut badge_priorities:Vec<u64> = Vec::new();
-    rucksacks.lines().for_each( | rucksack| {
-        let items_bits = convert_to_alphabet_bitset(rucksack.to_string());
-        badge_priorities.push(items_bits);
-    });
-
-    let mut badge_items:Vec<u64> = Vec::new();
-    for elve_group in badge_priorities.chunks(3) {
-        let bagde = elve_group[0] & elve_group[1] & elve_group[2];
-        badge_items.push(bagde);
-    }
-    badge_items
+     rucksacks
+        .lines()
+        .map( | rucksack| {
+            convert_to_alphabet_bitset(rucksack.to_string())
+        })
+        .collect::<Vec<u64>>()
+        .chunks(3)
+        .map(|elve_group| {
+            elve_group[0] & elve_group[1] & elve_group[2]
+        })
+         .collect::<Vec<u64>>()
 }
 
 fn calculate_priority(priority_items: Vec<u64>) -> i32 {
-    let mut sum_of_priorities = 0;
-    for items in priority_items {
-        sum_of_priorities += get_bit_positions(items)
-    }
-    sum_of_priorities
+        priority_items
+            .iter()
+            .fold(0, |sum_of_priorities, current_item|
+                sum_of_priorities + get_bit_positions(*current_item)
+            )
 }
 
 fn get_bit_positions(items: u64) -> i32 {
@@ -59,13 +57,15 @@ fn split_into_compartments(rucksack: &str) -> (String, String) {
 }
 
 fn convert_to_alphabet_bitset(rucksack_items: String) -> u64 {
-    rucksack_items.chars().fold(0, |alphabet, current_item| {
-        let bit_position = match current_item.is_ascii_lowercase() {
-            true => current_item as u64 - 97,        // Lowercase letters start at ASCII 97
-            false => current_item as u64 - 65 + 26   // Uppercase letters start at ASCII 65, but need Offset for Priorities
-        };
-        alphabet | (1 << bit_position)
-    })
+    rucksack_items
+        .chars()
+        .fold(0, |alphabet, current_item| {
+            let bit_position = match current_item.is_ascii_lowercase() {
+                true => current_item as u64 - 97,        // Lowercase letters start at ASCII 97
+                false => current_item as u64 - 65 + 26   // Uppercase letters start at ASCII 65, but need Offset for Priorities
+            };
+            alphabet | (1 << bit_position)
+        })
 }
 
 #[cfg(test)]
