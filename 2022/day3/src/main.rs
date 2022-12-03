@@ -13,8 +13,8 @@ fn find_priority_items(rucksacks: &str) -> Vec<u64> {
     rucksacks
         .lines()
         .map( | rucksack| {
-            let compartments = split_into_compartments(rucksack);
-            convert_to_alphabet_bitset(compartments.0) & convert_to_alphabet_bitset(compartments.1)
+            let (c1, c2) = rucksack.split_at(rucksack.len()/2);
+            convert_to_alphabet_bitset(c1.to_string()) & convert_to_alphabet_bitset(c2.to_string())
         })
         .collect::<Vec<u64>>()
 }
@@ -49,11 +49,6 @@ fn get_bit_positions(items: u64) -> i32 {
         }
     }
     sum_of_bit_positions
-}
-
-fn split_into_compartments(rucksack: &str) -> (String, String) {
-    let compartments = rucksack.split_at(rucksack.len()/2);
-    (compartments.0.to_string(), compartments.1.to_string())
 }
 
 fn convert_to_alphabet_bitset(rucksack_items: String) -> u64 {
