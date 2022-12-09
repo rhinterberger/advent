@@ -1,3 +1,4 @@
+use std::borrow::{Borrow, BorrowMut};
 use std::collections::HashMap;
 use std::fs;
 
@@ -6,9 +7,9 @@ fn main() {
 
     let dirs = prepare_tree(input_string);
 
-    let sum = dirs.clone()
+    let sum = dirs.borrow()
         .into_iter()
-        .filter(|(_path, size)| *size <= 100000)
+        .filter(|(_path, size)| **size <= 100000)
         .fold(0,|sum, (_path, size)| sum+size);
 
     println!("{:?}", sum);
