@@ -4,29 +4,7 @@ use std::fs;
 fn main() {
     let input_string = fs::read_to_string("input2.txt").expect("Failed to open [input.txt]");
 
-    let mut dirs: HashMap<String, i32> = HashMap::new();
-    let mut cwd = String::new();
-
-    for line in input_string
-        .lines()
-        .filter(ignore_lines)
-    {
-        let line_result = parse_line(line, &cwd);
-        cwd = line_result.0;
-
-        let mut parent_path= cwd.to_string();
-        while parent_path != "/" {
-            parent_path = parent_path
-                .rsplit_once("#")
-                .unwrap()
-                .0
-                .to_string();
-
-            dirs.entry(parent_path.to_string())
-                .and_modify(|v| { *v += line_result.1 } )
-                .or_insert(line_result.1);
-        }
-    }
+    let dirs = prepare_tree(input_string);
 
     let sum = dirs.clone()
         .into_iter()
@@ -43,6 +21,33 @@ fn main() {
         .unwrap();
 
     println!("{}", dir.1);
+}
+
+fn prepare_tree(input_string: String) -> HashMap<String, i32> {
+    let mut dirs: HashMap<String, i32> = HashMap::new();
+    let mut cwd = String::new();
+
+    for line in input_string
+        .lines()
+        .filter(ignore_lines)
+    {
+        let line_result = parse_line(line, &cwd);
+        cwd = line_result.0;
+
+        let mut parent_path = cwd.to_string();
+        while parent_path != "/" {
+            parent_path = parent_path
+                .rsplit_once("#")
+                .unwrap()
+                .0
+                .to_string();
+
+            dirs.entry(parent_path.to_string())
+                .and_modify(|v| { *v += line_result.1 })
+                .or_insert(line_result.1);
+        }
+    }
+    dirs
 }
 
 fn ignore_lines(line: &&str) -> bool {
